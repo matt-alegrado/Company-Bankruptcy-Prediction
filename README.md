@@ -47,3 +47,4 @@ Then select the kernel "Python Bankruptcy_env" to run the notebook in the conda 
 
 ## How to Run
 Simply run our notebook, `visualization.ipynb`, to generate the results and plots locally.
+To test on real data, run with `python early_warning_system.py [input_path.csv]` to see which companies are flagged, or simply run with `python early_warning_system.py` to test with sample instances. 
