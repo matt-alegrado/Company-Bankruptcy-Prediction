@@ -47,4 +47,30 @@ Then select the kernel "Python Bankruptcy_env" to run the notebook in the conda 
 
 ## How to Run
 Simply run our notebook, `visualization.ipynb`, to generate the results and plots locally.
-To test on real data, run with `python early_warning_system.py [input_path.csv]` to see which companies are flagged, or simply run with `python early_warning_system.py` to test with sample instances. 
+
+For Early Warning System
+
+1. File Mode (Batch Processing)
+
+Use the --file argument to process a CSV file containing company data. The script will automatically clean the column names, run the prediction, and save the full results and flagged records to the output/ directory.
+
+Command:
+
+```bash
+python early_warning_system.py --file <path/to/your/input_data.csv>
+```
+
+2. Interactive Mode (Single Record)
+
+Use the -i or --interactive flag to enter a mode where you are prompted to manually enter the feature values for a single record. The script will output the prediction and the detailed reason directly to the console.
+
+Command:
+
+```bash
+python early_warning_system.py -i
+# OR
+python early_warning_system.py --interactive
+```
+
+3. Sample Usage
+If you run the script without any arguments, it will run on the sample instances.
