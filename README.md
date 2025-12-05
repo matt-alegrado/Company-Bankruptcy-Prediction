@@ -73,6 +73,7 @@ python early_warning_system.py --interactive
 ```
 
 3. Sample Usage
+   
 If you run the script without any arguments, it will run on the sample instances.
 
 ## Limitations
