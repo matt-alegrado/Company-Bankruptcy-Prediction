@@ -74,3 +74,7 @@ python early_warning_system.py --interactive
 
 3. Sample Usage
 If you run the script without any arguments, it will run on the sample instances.
+
+## Limitations
+
+Due to limitations in the available dataset, our model may not handle rare or extreme scenarios that were not observed during training. For instance, a company with a debt ratio greater than 1 would, by financial logic, almost certainly be bankrupt. However, our model will incorrectly predict it as low risk. 
