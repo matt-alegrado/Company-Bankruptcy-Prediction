@@ -24,13 +24,8 @@ except Exception as e:
     sys.exit(1)
 
 best_threshold  = metadata.get('best_threshold', 0.5) # Default value for robustness
-PROFIT_THR      = metadata.get('per_share_net_profit_before_tax_yuan_thr', -0.5)
-QUICK_THR       = metadata.get('quick_ratio_thr', 0.8)
 
-def predict_early_warning(df: pd.DataFrame,
-                          profit_col: str = "per_share_net_profit_before_tax_yuan",
-                          quick_col: str = "quick_ratio"
-                          ) -> pd.DataFrame:
+def predict_early_warning(df: pd.DataFrame) -> pd.DataFrame:
     """
     Computes Early Warning System flags based on Random Forest model and a simple rule.
     """
@@ -47,62 +42,16 @@ def predict_early_warning(df: pd.DataFrame,
         print("\nWarning: Missing columns required for Random Forest prediction:")
         print(f"   Missing {len(missing_features)} features, RF prediction will be NaN.")
         df_out["ews_probability"] = float('nan')
-        df_out["ews_flag_model"]   = False
+        df_out["ews_flag"]   = False
     else:
         try:
             df_out["ews_probability"] = model.predict_proba(df_out[feature_columns])[:, 1]
-            df_out["ews_flag_model"]   = df_out["ews_probability"] >= best_threshold
+            df_out["ews_flag"]   = df_out["ews_probability"] >= best_threshold
         except Exception as e:
             print(f"ERROR during model prediction: {e}. Setting RF flags to False.")
             df_out["ews_probability"] = float('nan')
-            df_out["ews_flag_model"]   = False
-
-    # Rule-based Prediction (Surrogate tree)
-    rule_cols_present = all(col in df_out.columns for col in [profit_col, quick_col])
-    if rule_cols_present:
-        # Calculate individual flags for detailed reasoning
-        df_out["ews_flag_profit"] = df_out[profit_col] <= PROFIT_THR
-        df_out["ews_flag_quick"]  = df_out[quick_col]  <= QUICK_THR
-        
-        # The final rule flag is the conjunction of the two
-        df_out["ews_flag_rule"] = df_out["ews_flag_profit"] & df_out["ews_flag_quick"]
-    else:
-        print(f"Warning: Rule-based columns missing ({profit_col} or {quick_col}). Setting rule flag to False.")
-        df_out["ews_flag_rule"] = False
-        df_out["ews_flag_profit"] = False # Ensure helper columns exist
-        df_out["ews_flag_quick"]  = False
-
-    # Final Decision
-    df_out["ews_high_risk"] = df_out["ews_flag_model"] | df_out["ews_flag_rule"]
+            df_out["ews_flag"]   = False
     
-    # Reason Generation 
-    reasons = []
-    for _, row in df_out.iterrows():
-        if row["ews_high_risk"]:
-            reason = []
-            # Model Reason
-            if row["ews_flag_model"] and not np.isnan(row["ews_probability"]):
-                reason.append(f"Model (Prob={row['ews_probability']:.4f})")
-            
-            # Rule Reason 
-            if row["ews_flag_rule"]:
-                rule_detail = []
-                if row["ews_flag_profit"]:
-                    rule_detail.append("Low Profitability")
-                if row["ews_flag_quick"]:
-                    rule_detail.append("Low Liquidity")
-                
-                # Rule flag is TRUE only if BOTH are true, so we can use "AND"
-                if rule_detail:
-                    reason.append(f"{' AND '.join(rule_detail)}")
-            
-            reasons.append(" + ".join(reason))
-        else:
-            reasons.append("Low Risk")
-    df_out["ews_reason"] = reasons
-
-    # Drop temporary rule columns before returning
-    df_out = df_out.drop(columns=["ews_flag_profit", "ews_flag_quick"], errors='ignore')
 
     return df_out
 
@@ -148,11 +97,8 @@ def interactive_mode():
     print("="*60)
     if not result.empty:
         print(result[[
-            "ews_high_risk", 
             "ews_probability", 
-            "ews_flag_model", 
-            "ews_flag_rule",
-            "ews_reason"
+            "ews_flag", 
         ]].to_string(index=False))
     print("="*60)
 
@@ -235,7 +181,7 @@ def main():
     result.to_csv(output_file, index=False)
 
     # Pretty summary
-    n_high = result["ews_high_risk"].sum()
+    n_high = result["ews_flag"].sum()
     print("\n" + "="*60)
     print("EARLY WARNING SYSTEM — BATCH COMPLETE")
     print("="*60)
@@ -244,14 +190,13 @@ def main():
     print(f"Results saved to    : {output_file}")
     if n_high > 0:
         flagged_file = f"output/FLAGGED_only_{timestamp}.csv"
-        result[result["ews_high_risk"]].to_csv(flagged_file, index=False)
         print(f"Flagged records only: {flagged_file}")
     print("="*60)
 
     # Show first few rows safely
     show_n = min(10, len(result))
     if show_n > 0:
-        cols = ["ews_probability", "ews_flag_model", "ews_flag_rule", "ews_high_risk", "ews_reason"]
+        cols = ["ews_probability", "ews_flag"]
         avail = [c for c in cols if c in result.columns]
         print(f"\nFirst {show_n} prediction(s):")
         print(result[avail].head(show_n).to_string(index=False))

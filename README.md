@@ -50,7 +50,7 @@ Simply run our notebook, `visualization.ipynb`, to generate the results and plot
 
 For Early Warning System
 
-1. File Mode (Batch Processing)
+File Mode (Batch Processing)
 
 Use the --file argument to process a CSV file containing company data. The script will automatically clean the column names, run the prediction, and save the full results and flagged records to the output/ directory.
 
@@ -60,7 +60,7 @@ Command:
 python early_warning_system.py --file <path/to/your/input_data.csv>
 ```
 
-2. Interactive Mode (Single Record)
+Interactive Mode (Single Record)
 
 Use the -i or --interactive flag to enter a mode where you are prompted to manually enter the feature values for a single record. The script will output the prediction and the detailed reason directly to the console.
 
@@ -72,10 +72,10 @@ python early_warning_system.py -i
 python early_warning_system.py --interactive
 ```
 
-3. Sample Usage
+Sample Usage
    
 If you run the script without any arguments, it will run on the sample instances.
 
 ## Limitations
+Our current model performance shows only a marginal improvement over random guessing (AUC $\approx 0.5$). This sub-optimal result is due to several intrinsic challenges in financial distress prediction: Extreme class imbalance (bankruptcy is rare), high non-linearity and correlation among financial features, and the data's inability to account for critical external macroeconomic shocks or internal operational events that are often the true catalysts for failure. Future work will focus on time-series analysis and cost-sensitive learning to overcome these hurdles.
 
-Due to limitations in the available dataset, our model may not handle rare or extreme scenarios that were not observed during training. For instance, a company with a debt ratio greater than 1 would, by financial logic, almost certainly be bankrupt. However, our model will incorrectly predict it as low risk. 
