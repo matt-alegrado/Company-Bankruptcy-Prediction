@@ -6,6 +6,8 @@ Team Members: Kendra Chen, Zhuosheng Song, Matthew Alegrado, Jinglin Cao
 
 This notebook presents a comprehensive analysis of Company Bankruptcy Prediction in a Taiwan dataset, investigating financial indicators that signal corporate distress. The objective is to construct a robust predictive pipeline capable of identifying firms at elevated risk of bankruptcy.
 
+Access the [**video presentation**](https://youtu.be/kfGxHz3kUjc) through the hyperlink. 
+
 ## Primary Task
 
 **Main task**: Build a model pipeline to assess company distress using financial indicators.
